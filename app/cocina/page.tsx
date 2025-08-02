@@ -74,6 +74,12 @@ export default function AttendeePage() {
     TICKS: [],
   });
 
+  const [scanActive, setScanActive] = useState(false);
+
+  const toggleScanner = () => {
+    setScanActive((prev) => !prev);  // Activa o desactiva el escáner
+  };
+
   const [status, setStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [lastScan, setLastScan] = useState<string>('');
   const router = useRouter();
@@ -206,77 +212,26 @@ export default function AttendeePage() {
           </CardContent>
         </Card>
 
-        {/* Tickets */}
-        <div className="space-y-4">
-          <h2 className="text-xl font-semibold flex items-center gap-2 text-gray-900 dark:text-white">
-            <Ticket className="h-5 w-5" />
-            Mis Cupones
-          </h2>
-
-          {user.TICKS.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {user.TICKS.map((ticket) => (
-                <Card
-                  key={ticket.id}
-                  className={ticket.is_used ? 'opacity-60' : ''}
-                >
-                  <CardHeader>
-                    <CardDescription>
-                      {ticket.is_used ? (
-                        <span className="text-red-600">
-                          Canjeado el{' '}
-                          {new Date(ticket.used_at!).toLocaleString()}
-                        </span>
-                      ) : (
-                        <span className="text-green-600">
-                          Disponible para canjear
-                        </span>
-                      )}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="text-center space-y-4">
-                    <h2>{ticket.ticket_type}</h2>
-                    <div className="flex justify-center">
-                      <QRGenerator
-                        value={ticket.qr_code}
-                        size={200}
-                        className={ticket.is_used ? 'grayscale' : ''}
-                      />
-                    </div>
-                    <p className="text-xs text-gray-500 font-mono">
-                      {ticket.qr_code}
-                    </p>
-                    <Badge variant={ticket.is_used ? 'destructive' : 'default'}>
-                      {ticket.is_used ? 'Canjeado' : 'Disponible'}
-                    </Badge>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          ) : (
-            <Card>
-              <CardContent className="text-center p-8">
-                <Ticket className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-600">No tienes cupones asignados aún</p>
-              </CardContent>
-            </Card>
-          )}
-        </div>
-
         {/* Escáner QR */}
         <div className="pt-8 border-t text-center space-y-4">
           <h2 className="text-xl font-semibold">Escanear Código QR</h2>
           <div className="w-full max-w-sm mx-auto border rounded-md overflow-hidden">
-            <QrReader
-              onUpdate={(err, result) => {
-                if (result) handleScan(result.getText());
-              }}
-              onError={(err) => {
-                console.error('Error escáner:', err);
-              }}
-              width={400}
-              height={300}
-            />
+            <div>
+              <button onClick={toggleScanner}>
+                {scanActive ? 'Detener Escaneo' : 'Iniciar Escaneo'}
+              </button>
+
+              {scanActive && (
+                <QrReader
+                  onUpdate={(err, result) => {
+                    if (result) handleScan(result.getText());
+                  }}
+                  // onError={handleError}
+                  width={400}
+                  height={300}
+                />
+              )}
+            </div>
           </div>
           {status === 'success' && (
             <Badge variant="default">✅ Ticket validado correctamente</Badge>

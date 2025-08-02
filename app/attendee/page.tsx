@@ -245,7 +245,6 @@ export default function AttendeePage() {
                       <QRGenerator
                         value={ticket.qr_code}
                         size={200}
-                        className={ticket.is_used ? 'grayscale' : ''}
                       />
                     </div>
                     <p className="text-xs text-gray-500 font-mono">
