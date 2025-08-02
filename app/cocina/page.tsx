@@ -10,7 +10,15 @@ import {
 } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { QRGenerator } from '@/components/qr-generator';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogClose,
+} from '@/components/ui/dialog';
 import {
   User as LucideUser,
   Church,
@@ -18,6 +26,7 @@ import {
   CheckCircle,
   Clock,
   LogOut,
+  XCircle,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
@@ -75,15 +84,19 @@ export default function AttendeePage() {
   });
 
   const [scanActive, setScanActive] = useState(false);
-
-  const toggleScanner = () => {
-    setScanActive((prev) => !prev);  // Activa o desactiva el escáner
-  };
-
   const [status, setStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [lastScan, setLastScan] = useState<string>('');
+  const [modalState, setModalState] = useState<{
+    open: boolean;
+    status: 'success' | 'error' | null;
+  }>({ open: false, status: null });
+
   const router = useRouter();
   const supabase = createClient();
+
+  const toggleScanner = () => {
+    setScanActive((prev) => !prev);
+  };
 
   const handleSignOut = async () => {
     const { error } = await supabase.auth.signOut();
@@ -127,9 +140,11 @@ export default function AttendeePage() {
 
     if (ticket && !error) {
       setStatus('success');
+      setModalState({ open: true, status: 'success' });
       getUserAndTickets();
     } else {
       setStatus('error');
+      setModalState({ open: true, status: 'error' });
     }
 
     setTimeout(() => setStatus('idle'), 1500);
@@ -153,7 +168,7 @@ export default function AttendeePage() {
           </Button>
         </div>
 
-        {/* Info Personal */}
+        {/* Información del usuario */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -226,23 +241,50 @@ export default function AttendeePage() {
                   onUpdate={(err, result) => {
                     if (result) handleScan(result.getText());
                   }}
-                  // onError={handleError}
                   width={400}
                   height={300}
                 />
               )}
             </div>
           </div>
-          {status === 'success' && (
-            <Badge variant="default">✅ Ticket validado correctamente</Badge>
-          )}
-          {status === 'error' && (
-            <Badge variant="destructive">
-              ❌ Código inválido o ya canjeado
-            </Badge>
-          )}
         </div>
       </div>
+
+      {/* Modal de Feedback */}
+      <Dialog
+        open={modalState.open}
+        onOpenChange={(open) =>
+          !open && setModalState({ open: false, status: null })
+        }
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              {modalState.status === 'success' ? (
+                <>
+                  <CheckCircle className="text-green-500" />
+                  ¡Ticket validado!
+                </>
+              ) : (
+                <>
+                  <XCircle className="text-red-500" />
+                  Código inválido
+                </>
+              )}
+            </DialogTitle>
+            <DialogDescription>
+              {modalState.status === 'success'
+                ? 'El ticket ha sido validado correctamente.'
+                : 'Este código es inválido o ya fue canjeado.'}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button>Entendido</Button>
+            </DialogClose>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
