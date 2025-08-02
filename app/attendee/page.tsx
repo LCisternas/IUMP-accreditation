@@ -12,6 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { QRGenerator } from '@/components/qr-generator';
 import { mockAuth, mockTickets } from '@/lib/mock-data';
+import { QRCodeSVG } from 'qrcode.react';
 import {
   User,
   Church,
@@ -224,8 +225,7 @@ export default function AttendeePage() {
                   className={ticket.is_used ? 'opacity-60' : ''}
                 >
                   <CardHeader>
-                    <CardTitle className="capitalize flex items-center gap-2">
-                    </CardTitle>
+                    <CardTitle className="capitalize flex items-center gap-2"></CardTitle>
                     <CardDescription>
                       {ticket.is_used ? (
                         <span className="text-red-600">
@@ -242,10 +242,7 @@ export default function AttendeePage() {
                   <CardContent className="text-center space-y-4">
                     <h2>{ticket.ticket_type}</h2>
                     <div className="flex justify-center">
-                      <QRGenerator
-                        value={ticket.qr_code}
-                        size={200}
-                      />
+                      <QRCodeSVG value={ticket.qr_code} size={256} />
                     </div>
                     <p className="text-xs text-gray-500 font-mono">
                       {ticket.qr_code}

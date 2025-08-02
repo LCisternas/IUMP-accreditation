@@ -52,6 +52,7 @@
     "next-themes": "latest",
     "papaparse": "^5.5.3",
     "qr-scanner": "latest",
+    "qrcode.react": "^4.2.0",
     "react": "^19",
     "react-day-picker": "9.8.0",
     "react-dom": "^19",
