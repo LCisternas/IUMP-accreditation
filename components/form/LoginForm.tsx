@@ -40,7 +40,7 @@ const LoginForm = () => {
       setError('Credenciales erroneas');
     } else {
       const { error } = await supabase.auth.signInWithPassword({
-        email: UserData.email,
+        email: UserData.email ? UserData.email : "",
         password: password,
       });
       if (error) {
