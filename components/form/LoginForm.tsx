@@ -1,11 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Label } from '../ui/label';
 import { Input } from '../ui/input';
 import { Button } from '../ui/button';
 import { Alert, AlertDescription } from '../ui/alert';
-import { formatRUT } from '@/lib/mock-data';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 
@@ -18,50 +17,77 @@ const LoginForm = () => {
   const supabase = createClient();
   const router = useRouter();
 
+  // Redirigir si ya está logueado
+  useEffect(() => {
+    const checkSession = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (session?.user.email) {
+        const { data: userData, error: userError } = await supabase
+          .from('users')
+          .select(`*, ROL: role(*)`)
+          .eq('email', session.user.email)
+          .single();
+
+        if (!userError && userData?.ROL?.name) {
+          if (userData.ROL.name === 'ADMIN') {
+            router.replace('/admin');
+          } else if (userData.ROL.name === 'LEADER') {
+            router.replace('/monitor');
+          } else if (userData.ROL.name === 'KITCHEN') {
+            router.replace('/cocina');
+          } else {
+            router.replace('/attendee');
+          }
+        }
+      }
+    };
+
+    checkSession();
+  }, []);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
 
-    const { data: UserData, error: UserError } = await supabase
+    const { data: userData, error: userError } = await supabase
       .from('users')
-      .select(
-        `
-          *,
-          ROL: role(*)
-        `
-      )
+      .select(`*, ROL: role(*)`)
       .eq('rut', rut)
       .single();
 
-    if (UserError) {
-      console.log(UserError, 'ERROR USER TABLE');
+    if (userError || !userData?.email) {
+      console.log(userError, 'ERROR USER TABLE');
       setLoading(false);
-      setError('Credenciales erroneas');
+      setError('Credenciales erróneas');
+      return;
+    }
+
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email: userData.email,
+      password,
+    });
+
+    if (signInError) {
+      console.log(signInError, 'ERROR AUTH');
+      setLoading(false);
+      setError('Credenciales erróneas');
+      return;
+    }
+
+    if (userData.ROL?.name === 'ADMIN') {
+      router.push('/admin');
+    } else if (userData.ROL?.name === 'LEADER') {
+      router.push('/monitor');
+    } else if (userData.ROL?.name === 'KITCHEN') {
+      router.push('/cocina');
     } else {
-      const { error } = await supabase.auth.signInWithPassword({
-        email: UserData.email ? UserData.email : "",
-        password: password,
-      });
-      if (error) {
-        console.log(error, 'ERROR USER AUTH');
-        setLoading(false);
-        setError('Credenciales erroneas');
-      } else {
-        if (UserData.ROL?.name === 'ADMIN') {
-          router.push('/admin');
-        } else if (UserData.ROL?.name === 'LEADER') {
-          router.push('/monitor');
-        } else if (UserData.ROL?.name === 'KITCHEN') {
-          router.push('/cocina');
-        } else {
-          router.push('/attendee');
-        }
-      }
+      router.push('/attendee');
     }
   };
-
-  console.log(rut, password)
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
@@ -86,21 +112,17 @@ const LoginForm = () => {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
-          placeholder="Tu RUT sin puntos y sin -"
+          placeholder="Tu RUT sin dígito verificador"
         />
       </div>
 
       {error && (
-        <Alert className='border-red-500 bg-transparent'>
-          <AlertDescription className='text-red-500'>{error}</AlertDescription>
+        <Alert className="border-red-500 bg-transparent">
+          <AlertDescription className="text-red-500">{error}</AlertDescription>
         </Alert>
       )}
 
-      <Button
-        type="submit"
-        className="w-full"
-        disabled={loading}
-      >
+      <Button type="submit" className="w-full" disabled={loading}>
         {loading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
       </Button>
     </form>
