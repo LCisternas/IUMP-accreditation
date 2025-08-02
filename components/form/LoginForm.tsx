@@ -86,7 +86,7 @@ const LoginForm = () => {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
-          placeholder="Tu RUT sin digito verificador"
+          placeholder="Tu RUT sin puntos y sin -"
         />
       </div>
 
