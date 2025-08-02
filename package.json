@@ -56,6 +56,7 @@
     "react-day-picker": "9.8.0",
     "react-dom": "^19",
     "react-hook-form": "^7.54.1",
+    "react-qr-barcode-scanner": "^2.1.8",
     "react-qr-scanner": "1.0.0-alpha.11",
     "react-resizable-panels": "^2.1.7",
     "recharts": "2.15.0",
