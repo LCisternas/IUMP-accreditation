@@ -186,14 +186,14 @@ export default function CocinaDashboard() {
     }, 500)
   }
 
-  useEffect(() => {
-    if (!currentUser || currentUser.role !== "cocina") {
-      router.push("/login")
-      return
-    }
+  // useEffect(() => {
+  //   if (!currentUser || currentUser.role !== "cocina") {
+  //     router.push("/login")
+  //     return
+  //   }
 
-    loadData()
-  }, [router])
+  //   loadData()
+  // }, [router])
 
   if (loading) {
     return (

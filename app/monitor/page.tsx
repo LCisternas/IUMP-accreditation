@@ -19,16 +19,16 @@ export default function MonitorDashboard() {
   const [showMemberDetails, setShowMemberDetails] = useState(false)
   const router = useRouter()
 
-  useEffect(() => {
-    // Verificar autenticación
-    const currentUser = mockAuth.getCurrentUser()
-    if (!currentUser || currentUser.role !== "monitor") {
-      router.push("/login")
-      return
-    }
+  // useEffect(() => {
+  //   // Verificar autenticación
+  //   const currentUser = mockAuth.getCurrentUser()
+  //   if (!currentUser || currentUser.role !== "monitor") {
+  //     router.push("/login")
+  //     return
+  //   }
 
-    loadData(currentUser)
-  }, [router])
+  //   loadData(currentUser)
+  // }, [router])
 
   const loadData = (currentUser: any) => {
     // Simular carga de datos

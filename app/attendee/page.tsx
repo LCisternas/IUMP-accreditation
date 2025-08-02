@@ -16,17 +16,6 @@ export default function AttendeePage() {
   const [loading, setLoading] = useState(true)
   const router = useRouter()
 
-  useEffect(() => {
-    // Verificar autenticación
-    const currentUser = mockAuth.getCurrentUser()
-    if (!currentUser || currentUser.role !== "attendee") {
-      router.push("/login")
-      return
-    }
-
-    loadUserData(currentUser)
-  }, [router])
-
   const loadUserData = (currentUser: any) => {
     // Simular carga de datos
     setTimeout(() => {
